@@ -78,8 +78,18 @@ if prompt := st.chat_input("Ask me anything (e.g., 'Search for latest news'):"):
         with st.chat_message("assistant"):
             st.markdown(response_content)
         st.session_state.messages.append({"role": "assistant", "content": response_content})
+    except openai.error.AuthenticationError:
+        st.error("Authentication failed: Please check your API key.")
+        st.session_state.messages.append({"role": "assistant", "content": "Error: Invalid API key."})
+    except openai.error.RateLimitError:
+        st.error("Rate limit exceeded: Please try again later.")
+        st.session_state.messages.append({"role": "assistant", "content": "Error: Rate limit exceeded."})
     except openai.error.OpenAIError as e:
         error_message = f"OpenAI API Error: {e}"
+        st.error(error_message)
+        st.session_state.messages.append({"role": "assistant", "content": error_message})
+    except Exception as e:
+        error_message = f"An unexpected error occurred: {e}"
         st.error(error_message)
         st.session_state.messages.append({"role": "assistant", "content": error_message})
    
