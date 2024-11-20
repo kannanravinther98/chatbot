@@ -1,23 +1,23 @@
 import streamlit as st
 from openai import OpenAI
 import requests  # Library for making HTTP requests (for internet access)
- 
+
 # Embed the API key directly (NOT recommended for production)
-OPENAI_API_KEY = "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"
- 
+OPENAI_API_KEY = "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"
+
 # Show title and description
-st.title("💬 Chatbot")
+st.title("💬 Chatbot with Internet Access")
 st.write(
-    "This chatbot uses OpenAI's models to generate responses "
-    #"The app demonstrates how to interact with models and fetch information online."
+    "This chatbot uses OpenAI's models to generate responses and access the internet. "
+    "The app demonstrates how to interact with models and fetch information online."
 )
- 
+
 # API key handling
 openai_api_key = OPENAI_API_KEY
- 
+
 # Initialize the OpenAI client
 client = OpenAI(api_key=openai_api_key)
- 
+
 # Sidebar settings
 st.sidebar.title("Settings")
 model = st.sidebar.selectbox(
@@ -25,22 +25,22 @@ model = st.sidebar.selectbox(
     options=["gpt-3.5-turbo", "gpt-4", "gpt-4-turbo"],
     index=0,
 )
- 
+
 # Initialize session state for chat history
 if "messages" not in st.session_state:
     st.session_state.messages = []
- 
+
 # Display chat history
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
- 
+
 # Chat input field
 if prompt := st.chat_input("Ask me anything (e.g., 'Search for latest news'):"):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
- 
+
     # Check if the user wants to fetch something online
     if "search" in prompt.lower():
         with st.chat_message("assistant"):
@@ -68,7 +68,7 @@ if prompt := st.chat_input("Ask me anything (e.g., 'Search for latest news'):"):
                 ],
                 stream=True,
             )
- 
+
             # Stream the response to the chat
             with st.chat_message("assistant"):
                 response = st.write_stream(stream)
