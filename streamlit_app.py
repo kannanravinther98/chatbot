@@ -3,7 +3,7 @@ from openai import OpenAI
 import requests  # Library for making HTTP requests (for internet access)
  
 # Embed the API key directly (NOT recommended for production)
-OPENAI_API_KEY = "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"
+OPENAI_API_KEY = "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"
  
 # Show title and description
 st.title("💬 Chatbot")
