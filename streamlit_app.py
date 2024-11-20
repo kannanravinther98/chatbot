@@ -12,8 +12,8 @@ st.write(
     "real-time information online when required."
 )
 
-# API key handling
-openai.api_key = OPENAI_API_KEY
+# # API key handling
+# openai.api_key = OPENAI_API_KEY
 
 # Sidebar settings
 st.sidebar.title("Settings")
@@ -71,7 +71,7 @@ if prompt := st.chat_input("Ask me anything (e.g., 'Search for latest news'):"):
         response_content = response.choices[0].message["content"]
 
         # Check if OpenAI indicates a lack of knowledge or fetch_online flag is set
-        if "do not have real-time capabilities" in response_content or fetch_online:
+        if "I do not have the latest information" in response_content or fetch_online:
             st.info("Fetching online information for the latest updates...")
             online_data = fetch_online_data(prompt)
             response_content += f"\n\nOnline Information: {online_data}"
