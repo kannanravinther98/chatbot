@@ -1,56 +1,79 @@
 import streamlit as st
 from openai import OpenAI
+import requests  # Library for making HTTP requests (for internet access)
 
-# Show title and description.
-st.title("💬 Chatbot")
+# Embed the API key directly (NOT recommended for production)
+OPENAI_API_KEY = "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"
+
+# Show title and description
+st.title("💬 Chatbot with Internet Access")
 st.write(
-    "This is a simple chatbot that uses OpenAI's GPT-3.5 model to generate responses. "
-    "To use this app, you need to provide an OpenAI API key, which you can get [here](https://platform.openai.com/account/api-keys). "
-    "You can also learn how to build this app step by step by [following our tutorial](https://docs.streamlit.io/develop/tutorials/llms/build-conversational-apps)."
+    "This chatbot uses OpenAI's models to generate responses and access the internet. "
+    "The app demonstrates how to interact with models and fetch information online."
 )
 
-# Ask user for their OpenAI API key via `st.text_input`.
-# Alternatively, you can store the API key in `./.streamlit/secrets.toml` and access it
-# via `st.secrets`, see https://docs.streamlit.io/develop/concepts/connections/secrets-management
-openai_api_key = st.text_input("OpenAI API Key", type="password")
-if not openai_api_key:
-    st.info("Please add your OpenAI API key to continue.", icon="🗝️")
-else:
+# API key handling
+openai_api_key = OPENAI_API_KEY
 
-    # Create an OpenAI client.
-    client = OpenAI(api_key=openai_api_key)
+# Initialize the OpenAI client
+client = OpenAI(api_key=openai_api_key)
 
-    # Create a session state variable to store the chat messages. This ensures that the
-    # messages persist across reruns.
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
+# Sidebar settings
+st.sidebar.title("Settings")
+model = st.sidebar.selectbox(
+    "Select a model",
+    options=["gpt-3.5-turbo", "gpt-4", "gpt-4-turbo"],
+    index=0,
+)
 
-    # Display the existing chat messages via `st.chat_message`.
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+# Initialize session state for chat history
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 
-    # Create a chat input field to allow the user to enter a message. This will display
-    # automatically at the bottom of the page.
-    if prompt := st.chat_input("What is up?"):
+# Display chat history
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
-        # Store and display the current prompt.
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"):
-            st.markdown(prompt)
+# Chat input field
+if prompt := st.chat_input("Ask me anything (e.g., 'Search for latest news'):"):
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
 
-        # Generate a response using the OpenAI API.
-        stream = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": m["role"], "content": m["content"]}
-                for m in st.session_state.messages
-            ],
-            stream=True,
-        )
-
-        # Stream the response to the chat using `st.write_stream`, then store it in 
-        # session state.
+    # Check if the user wants to fetch something online
+    if "search" in prompt.lower():
         with st.chat_message("assistant"):
-            response = st.write_stream(stream)
-        st.session_state.messages.append({"role": "assistant", "content": response})
+            try:
+                # Perform a search using a public API or web scraper
+                search_query = prompt.lower().replace("search", "").strip()
+                response = requests.get(
+                    f"https://api.duckduckgo.com/?q={search_query}&format=json"
+                )
+                search_result = response.json().get("AbstractText", "No results found.")
+                st.markdown(f"Search Result: {search_result}")
+                st.session_state.messages.append({"role": "assistant", "content": search_result})
+            except Exception as e:
+                error_message = f"Failed to fetch search results: {e}"
+                st.markdown(error_message)
+                st.session_state.messages.append({"role": "assistant", "content": error_message})
+    else:
+        # Generate a response using the selected OpenAI model
+        try:
+            stream = client.chat.completions.create(
+                model=model,
+                messages=[
+                    {"role": m["role"], "content": m["content"]}
+                    for m in st.session_state.messages
+                ],
+                stream=True,
+            )
+
+            # Stream the response to the chat
+            with st.chat_message("assistant"):
+                response = st.write_stream(stream)
+            st.session_state.messages.append({"role": "assistant", "content": response})
+        except Exception as e:
+            error_message = f"An error occurred: {e}"
+            st.error(error_message)
+            st.session_state.messages.append({"role": "assistant", "content": error_message})
