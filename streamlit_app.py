@@ -78,4 +78,8 @@ if prompt := st.chat_input("Ask me anything (e.g., 'Search for latest news'):"):
         with st.chat_message("assistant"):
             st.markdown(response_content)
         st.session_state.messages.append({"role": "assistant", "content": response_content})
+    except openai.error.OpenAIError as e:
+        error_message = f"OpenAI API Error: {e}"
+        st.error(error_message)
+        st.session_state.messages.append({"role": "assistant", "content": error_message}")
    
