@@ -85,6 +85,4 @@ if prompt := st.chat_input("Ask me anything (e.g., 'Search for latest news'):"):
     except Exception as e:
         error_message = f"An unexpected error occurred: {e}"
         st.error(error_message)
-        st.session_state.messages.append({"role": "assistant", "content": error_message}")
-
-
+        st.session_state.messages.append({"role": "assistant", "content": error_message})
