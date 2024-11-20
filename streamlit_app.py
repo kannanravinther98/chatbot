@@ -54,7 +54,7 @@ if prompt := st.chat_input("Ask me anything (e.g., 'Search for latest news'):"):
     messages.extend(st.session_state.messages)
 
     # Get the initial OpenAI response
-    response = openai.ChatCompletion.create(
+    response = openai.chat.completions.create(
         model=model,
         messages=messages
     )
