@@ -3,7 +3,10 @@ import openai
 import requests
 
 # Embed the API key directly (NOT recommended for production)
-OPENAI_API_KEY = "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"
+OPENAI_API_KEY = "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"  # Replace with your actual OpenAI API key
+
+# Set the OpenAI API key
+openai.api_key = OPENAI_API_KEY
 
 # Show title and description
 st.title("💬 Smart Chatbot with Automatic Internet Access")
@@ -11,9 +14,6 @@ st.write(
     "This chatbot uses OpenAI's models to generate responses and fetch "
     "real-time information online when required."
 )
-
-# # API key handling
-# openai.api_key = OPENAI_API_KEY
 
 # Sidebar settings
 st.sidebar.title("Settings")
@@ -56,10 +56,8 @@ if prompt := st.chat_input("Ask me anything (e.g., 'Search for latest news'):"):
 
     try:
         # Prepare messages for OpenAI
-        messages = [
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": prompt}
-        ]
+        messages = [{"role": "system", "content": "You are a helpful assistant."}]
+        messages.extend(st.session_state.messages)
 
         # Get the initial OpenAI response
         response = openai.ChatCompletion.create(
@@ -80,7 +78,11 @@ if prompt := st.chat_input("Ask me anything (e.g., 'Search for latest news'):"):
         with st.chat_message("assistant"):
             st.markdown(response_content)
         st.session_state.messages.append({"role": "assistant", "content": response_content})
-    except Exception as e:
-        error_message = f"An error occurred: {e}"
+    except openai.error.OpenAIError as e:
+        error_message = f"OpenAI API Error: {e}"
         st.error(error_message)
-        st.session_state.messages.append({"role": "assistant", "content": error_message})
+        st.session_state.messages.append({"role": "assistant", "content": error_message}")
+    except Exception as e:
+        error_message = f"An unexpected error occurred: {e}"
+        st.error(error_message)
+        st.session_state.messages.append({"role": "assistant", "content": error_message}")
