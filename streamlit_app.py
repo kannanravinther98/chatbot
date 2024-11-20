@@ -3,7 +3,7 @@ import openai
 import requests
 
 # Embed the API key directly (NOT recommended for production)
-OPENAI_API_KEY = "your_openai_api_key_here"  # Replace with your actual OpenAI API key
+OPENAI_API_KEY = "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"  # Replace with your actual OpenAI API key
 
 # Set the OpenAI API key
 openai.api_key = OPENAI_API_KEY
